@@ -27,40 +27,71 @@ from src.config import (
 
 # 常见列名映射（统一为标准列名）
 COLUMN_ALIASES: dict[str, str] = {
+    # --- Title ---
     "title": "title",
+    "Job Title": "title",
+    "job_title": "title",
     "职位": "title",
     "岗位": "title",
     "岗位名称": "title",
     "职位名称": "title",
+    # --- Company ---
     "company": "company",
+    "Company Name": "company",
+    "company_name": "company",
     "公司": "company",
     "公司名称": "company",
     "企业": "company",
+    # --- Location ---
     "location": "location",
+    "Location": "location",
     "地区": "location",
     "城市": "location",
     "工作地点": "location",
     "所在地": "location",
+    # --- Description ---
     "description": "description",
+    "Description": "description",
+    "Job Description": "description",
+    "job_description": "description",
     "描述": "description",
     "职位描述": "description",
     "岗位描述": "description",
+    # --- Requirements ---
     "requirements": "requirements",
+    "skill": "requirements",
+    "skills": "requirements",
+    "skills_desc": "requirements",
+    "Skills": "requirements",
     "要求": "requirements",
     "任职要求": "requirements",
     "岗位要求": "requirements",
+    # --- Salary ---
     "salary": "salary",
+    "Salary": "salary",
+    "Salary Estimate": "salary",
+    "med_salary": "salary",
+    "min_salary": "salary",
+    "max_salary": "salary",
+    "normalized_salary": "salary",
     "薪资": "salary",
     "薪酬": "salary",
     "待遇": "salary",
+    # --- Education ---
     "education": "education",
+    "Education": "education",
     "学历": "education",
     "学历要求": "education",
+    # --- Experience ---
     "experience": "experience",
+    "Experience": "experience",
+    "formatted_experience_level": "experience",
     "经验": "experience",
     "经验要求": "experience",
     "工作经验": "experience",
+    # --- Industry ---
     "industry": "industry",
+    "Industry": "industry",
     "行业": "industry",
     "领域": "industry",
 }
