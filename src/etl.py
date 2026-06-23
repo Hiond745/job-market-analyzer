@@ -16,6 +16,7 @@ from src.config import (
     CITY_DISTRICT_MAP,
     EDUCATION_ORDER,
     EXPERIENCE_ORDER,
+    MAJOR_KEYWORDS,
     SALARY_BINS,
     SALARY_LABELS,
 )
@@ -568,7 +569,7 @@ def generate_sample_data(n: int = 5000) -> pd.DataFrame:
 def build_database(df: pd.DataFrame, db_path: Optional[Path] = None) -> None:
     """将 DataFrame 写入 SQLite 数据库。
 
-    创建 jobs 表，包含所有字段。
+    创建 jobs, companies, skills, major_keywords 四张表。
 
     Args:
         df: 清洗后的数据
@@ -593,11 +594,93 @@ def build_database(df: pd.DataFrame, db_path: Optional[Path] = None) -> None:
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_experience ON jobs(experience)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_salary ON jobs(salary_avg)")
 
+    # ── companies 表：从 jobs 去重提取 ──
+    cursor.execute("DROP TABLE IF EXISTS companies")
+    cursor.execute("""
+        CREATE TABLE companies AS
+        SELECT DISTINCT company, industry FROM jobs
+        WHERE company IS NOT NULL AND company != ''
+        ORDER BY company
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_company_name ON companies(company)")
+
+    # ── skills 表：预定义常见技能列表 ──
+    skills = [
+        "Python", "SQL", "Java", "Scala", "Go", "R",
+        "Hadoop", "Spark", "Flink", "Kafka", "Hive", "HBase",
+        "Tableau", "PowerBI", "FineBI", "Superset",
+        "MySQL", "PostgreSQL", "Oracle", "MongoDB", "Redis",
+        "PyTorch", "TensorFlow", "Scikit-learn", "XGBoost",
+        "Docker", "Kubernetes", "Linux", "Git",
+        "Airflow", "DataX", "SeaTunnel", "DolphinScheduler",
+        "StarRocks", "ClickHouse", "Doris",
+        "机器学习", "深度学习", "统计分析", "数据建模", "数据治理",
+        "ETL开发", "数据仓库", "数据可视化",
+    ]
+    cursor.execute("DROP TABLE IF EXISTS skills")
+    cursor.execute("""
+        CREATE TABLE skills (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE,
+            category TEXT
+        )
+    """)
+    for skill in skills:
+        # 粗略分类
+        if skill in ("Python", "SQL", "Java", "Scala", "Go", "R"):
+            category = "编程语言"
+        elif skill in ("Hadoop", "Spark", "Flink", "Kafka", "Hive", "HBase"):
+            category = "大数据组件"
+        elif skill in ("Tableau", "PowerBI", "FineBI", "Superset"):
+            category = "可视化工具"
+        elif skill in ("MySQL", "PostgreSQL", "Oracle", "MongoDB", "Redis"):
+            category = "数据库"
+        elif skill in ("PyTorch", "TensorFlow", "Scikit-learn", "XGBoost"):
+            category = "机器学习框架"
+        elif skill in ("Docker", "Kubernetes", "Linux", "Git"):
+            category = "工程工具"
+        elif skill in ("Airflow", "DataX", "SeaTunnel", "DolphinScheduler"):
+            category = "调度工具"
+        elif skill in ("StarRocks", "ClickHouse", "Doris"):
+            category = "OLAP引擎"
+        else:
+            category = "通用技能"
+        cursor.execute(
+            "INSERT OR IGNORE INTO skills (name, category) VALUES (?, ?)",
+            (skill, category),
+        )
+
+    # ── major_keywords 表：从 config.MAJOR_KEYWORDS 写入 ──
+    cursor.execute("DROP TABLE IF EXISTS major_keywords")
+    cursor.execute("""
+        CREATE TABLE major_keywords (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            major TEXT NOT NULL,
+            keyword TEXT NOT NULL,
+            type TEXT NOT NULL
+        )
+    """)
+    for major, (exact_list, broad_list) in MAJOR_KEYWORDS.items():
+        for kw in exact_list:
+            cursor.execute(
+                "INSERT INTO major_keywords (major, keyword, type) VALUES (?, ?, 'exact')",
+                (major, kw),
+            )
+        for kw in broad_list:
+            cursor.execute(
+                "INSERT INTO major_keywords (major, keyword, type) VALUES (?, ?, 'broad')",
+                (major, kw),
+            )
+
     conn.commit()
     conn.close()
 
     print(f"数据库已创建: {db_path}")
     print(f"   共写入 {len(df)} 条记录")
+    print(f"   companies: {df[['company', 'industry']].drop_duplicates().shape[0]} 条")
+    print(f"   skills: {len(skills)} 条")
+    total_kw = sum(len(e) + len(b) for e, b in MAJOR_KEYWORDS.values())
+    print(f"   major_keywords: {total_kw} 条")
 
 
 # ─────────────────────────────────────────────
