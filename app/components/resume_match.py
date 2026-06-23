@@ -8,12 +8,30 @@ import plotly.graph_objects as go
 from src.analyzer import get_jobs_by_title, resume_match_analysis
 
 def render(city: str, title: str, user_skills_str: str):
-    if not user_skills_str.strip():
-        st.info("💡 请在首页填写你的技能，即可查看与该岗位的匹配度分析")
-        st.markdown("<div style='background:#e8f4fd;padding:1rem;border-radius:8px;'><b>示例：</b> Python, SQL, Spark, Pandas, 机器学习, 统计学, Excel</div>", unsafe_allow_html=True)
+    # 本页面也提供一个技能输入框，方便直接修改
+    st.markdown("### 🛠️ 你的技能")
+    col_input, _ = st.columns([2, 3])
+    with col_input:
+        # 如果有首页传来的技能，用它做默认值
+        default_skills = user_skills_str if user_skills_str.strip() else ""
+        skills_input = st.text_input(
+            "用逗号分隔你掌握的技能",
+            value=default_skills,
+            placeholder="Python, SQL, Spark, Pandas, 机器学习, 统计学, Excel",
+            label_visibility="collapsed",
+            key=f"skills_input_{title}",
+        )
+
+    if not skills_input.strip():
+        st.info("💡 在上方输入你的技能，即可查看与该岗位的匹配度分析")
+        st.markdown("""
+        <div style='background:#e8f4fd;padding:1rem;border-radius:8px;'>
+        <b>示例：</b> Python, SQL, Spark, Pandas, 机器学习, 统计学, Excel
+        </div>
+        """, unsafe_allow_html=True)
         return
 
-    user_skills = [s.strip() for s in user_skills_str.split(",") if s.strip()]
+    user_skills = [s.strip() for s in skills_input.split(",") if s.strip()]
     df = get_jobs_by_title(title, city)
     if df.empty: st.warning("暂无该岗位数据"); return
 

@@ -20,6 +20,18 @@ skills_str = st.session_state.get("skills", "")
 
 st.markdown(f"<h1>📊 {title}</h1><p style='color:#666;'>{city}地区 · 市场分析详情</p>", unsafe_allow_html=True)
 
+# 数据来源说明
+if city in ("全国",) or city not in ["北京", "上海", "广州", "深圳", "杭州", "天津", "成都", "武汉", "南京", "西安"]:
+    st.info("""
+    📍 **数据来源说明：** 当前展示的岗位包含 **Glassdoor 真实数据（美国）** 和 **LinkedIn 真实数据（美国）**。
+    中国城市数据为基于真实市场模式生成的模拟数据。
+    """)
+else:
+    st.info("""
+    📍 **数据来源说明：** 中国城市数据为基于 Glassdoor 和 LinkedIn 真实岗位模式生成的 **高质量模拟数据**，
+    包含真实的岗位名称、技能分布、薪资范围和市场趋势，可用于参考分析。
+    """)
+
 tab1, tab2, tab3, tab4 = st.tabs(["📋 市场总览", "🔧 技能图谱", "🏢 公司画像", "📝 简历匹配"])
 with tab1: overview.render(city, title)
 with tab2: skills.render(city, title)
