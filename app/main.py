@@ -1,5 +1,9 @@
 """招聘市场智能分析工具 - Streamlit 入口"""
 
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import streamlit as st
 from src.config import DEFAULT_MAJOR, DEFAULT_CITY
 from src.matcher import recommend_positions

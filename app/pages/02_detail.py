@@ -1,4 +1,8 @@
 """岗位方向详情页（4 个 Tab）"""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import streamlit as st
 from src.config import DEFAULT_CITY
 from app.components import overview, skills, companies, resume_match
