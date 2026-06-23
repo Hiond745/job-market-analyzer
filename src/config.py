@@ -61,3 +61,26 @@ CITIES = sorted(CITY_DISTRICT_MAP.keys())
 
 # 可选专业列表
 MAJORS = sorted(MAJOR_KEYWORDS.keys())
+
+# 常见技能列表（供多选使用，按类别分组）
+SKILL_OPTIONS = sorted([
+    # 编程语言
+    "Python", "SQL", "Java", "Scala", "Go", "R", "C++", "Shell",
+    # 大数据组件
+    "Spark", "Hadoop", "Flink", "Kafka", "Hive", "HBase",
+    # 数据库
+    "MySQL", "PostgreSQL", "MongoDB", "Redis", "Oracle",
+    # 可视化
+    "Tableau", "PowerBI", "FineBI", "Superset", "Excel",
+    # 机器学习/AI
+    "机器学习", "深度学习", "NLP", "CV", "TensorFlow", "PyTorch",
+    "Scikit-learn", "XGBoost", "统计学", "AB测试", "特征工程",
+    # 工程工具
+    "Docker", "Kubernetes", "Linux", "Git", "Airflow", "ETL",
+    # 数据科学
+    "Pandas", "NumPy", "数据可视化", "数据建模", "数据治理",
+    # OLAP
+    "ClickHouse", "Doris", "StarRocks",
+    # 其他
+    "微服务", "模型部署", "数据结构", "算法", "数据分析",
+])

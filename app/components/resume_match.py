@@ -6,32 +6,40 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 import streamlit as st
 import plotly.graph_objects as go
 from src.analyzer import get_jobs_by_title, resume_match_analysis
+from src.config import SKILL_OPTIONS
+
+
+def _skills_to_str(skills_list: list[str]) -> str:
+    return ", ".join(skills_list)
+
+def _str_to_skills(s: str) -> list[str]:
+    return [x.strip() for x in s.split(",") if x.strip()]
 
 def render(city: str, title: str, user_skills_str: str):
-    # 本页面也提供一个技能输入框，方便直接修改
-    st.markdown("### 🛠️ 你的技能")
-    col_input, _ = st.columns([2, 3])
-    with col_input:
-        # 如果有首页传来的技能，用它做默认值
-        default_skills = user_skills_str if user_skills_str.strip() else ""
-        skills_input = st.text_input(
-            "用逗号分隔你掌握的技能",
-            value=default_skills,
-            placeholder="Python, SQL, Spark, Pandas, 机器学习, 统计学, Excel",
-            label_visibility="collapsed",
-            key=f"skills_input_{title}",
-        )
+    st.markdown("### 🛠️ 你的技能（从下方选择）")
 
-    if not skills_input.strip():
-        st.info("💡 在上方输入你的技能，即可查看与该岗位的匹配度分析")
+    # 将首页传来的技能字符串转为列表，作为默认值
+    default_selected = _str_to_skills(user_skills_str) if user_skills_str.strip() else []
+
+    selected_skills = st.multiselect(
+        "选择你掌握的技能",
+        options=SKILL_OPTIONS,
+        default=default_selected,
+        placeholder="搜索或选择技能...",
+        label_visibility="collapsed",
+        key=f"skills_multiselect_{title}",
+    )
+
+    if not selected_skills:
+        st.info("💡 在上方选择你掌握的技能，即可查看与该岗位的匹配度分析")
         st.markdown("""
         <div style='background:#e8f4fd;padding:1rem;border-radius:8px;'>
-        <b>示例：</b> Python, SQL, Spark, Pandas, 机器学习, 统计学, Excel
+        <b>提示：</b> 从下拉列表中选择技能，可多选
         </div>
         """, unsafe_allow_html=True)
         return
 
-    user_skills = [s.strip() for s in skills_input.split(",") if s.strip()]
+    user_skills = selected_skills
     df = get_jobs_by_title(title, city)
     if df.empty: st.warning("暂无该岗位数据"); return
 

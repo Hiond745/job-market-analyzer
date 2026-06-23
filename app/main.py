@@ -5,7 +5,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
-from src.config import DEFAULT_MAJOR, DEFAULT_CITY, MAJORS, CITIES
+from src.config import DEFAULT_MAJOR, DEFAULT_CITY, MAJORS, CITIES, SKILL_OPTIONS
 from src.matcher import recommend_positions
 
 st.set_page_config(
@@ -24,7 +24,7 @@ with st.sidebar:
         st.switch_page("pages/03_data_manage.py")
     st.markdown("---")
     st.markdown("**当前版本:** v0.1.0")
-    st.markdown("**数据量:** 预置5000条模拟数据")
+    st.markdown("**数据量:** 37,936条（含Glassdoor/LinkedIn真实数据）")
 
 # 初始化 Session State
 if "major" not in st.session_state:
@@ -33,6 +33,8 @@ if "city" not in st.session_state:
     st.session_state.city = ""
 if "skills" not in st.session_state:
     st.session_state.skills = ""
+if "skills_list" not in st.session_state:
+    st.session_state.skills_list = []
 if "recommendations" not in st.session_state:
     st.session_state.recommendations = None
 if "selected_title" not in st.session_state:
@@ -65,25 +67,37 @@ with st.container():
             city = st.selectbox("📍 目标地区", options=["全国"] + CITIES,
                                 index=CITIES.index(DEFAULT_CITY) + 1,
                                 help="选择你想找工作的城市，选「全国」查看所有地区")
-            skills = st.text_input("🛠️ 你的技能（可选）", placeholder="Python, SQL, Spark, ...",
-                                   help="用逗号分隔你掌握的技能，用于简历匹配分析")
 
             submitted = st.form_submit_button("🚀 开始分析", use_container_width=True)
 
             if submitted:
                 if not major.strip():
                     st.error("请输入专业名称")
-                elif not city.strip():
-                    st.error("请输入目标地区")
                 else:
                     with st.spinner("🔍 正在分析市场数据..."):
-                        recs = recommend_positions(major.strip(), city.strip())
+                        recs = recommend_positions(major.strip(), city)
                         st.session_state.major = major.strip()
-                        st.session_state.city = city.strip()
-                        st.session_state.skills = skills.strip()
+                        st.session_state.city = city
                         st.session_state.recommendations = recs
                         st.session_state.selected_title = ""
                         st.switch_page("pages/01_recommend.py")
+
+        # 技能选择（放在表单外面，多选）
+        st.markdown("### 🛠️ 你的技能（选填）")
+        st.caption("选择你掌握的技能，用于详情页的简历匹配分析")
+        # 从 session_state 恢复已有选择
+        saved = st.session_state.get("skills_list", [])
+        selected_skills = st.multiselect(
+            "选择技能",
+            options=SKILL_OPTIONS,
+            default=saved,
+            placeholder="搜索或选择技能...",
+            label_visibility="collapsed",
+            key="skills_multiselect_home",
+        )
+        # 存到 session_state
+        st.session_state.skills_list = selected_skills
+        st.session_state.skills = ", ".join(selected_skills)
 
 # 底部信息
 st.markdown("---")

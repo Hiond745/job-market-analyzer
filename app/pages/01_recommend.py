@@ -14,16 +14,15 @@ recs = st.session_state.recommendations
 major = st.session_state.get("major", "")
 city = st.session_state.get("city", "")
 skills = st.session_state.get("skills", "")
+skills_list = st.session_state.get("skills_list", [])
+skill_text = f" · 已选 {len(skills_list)} 项技能" if skills_list else " · 未选技能（可在详情页填写）"
 
-st.markdown(f"""
-<div style='padding: 0.5rem 0;'>
+st.markdown(f"""<div style='padding: 0.5rem 0;'>
     <h1>🎯 为你推荐的岗位方向</h1>
     <p style='color: #666; font-size: 1.1rem;'>
-        {major} · {city}
-        {' · 已填写技能' if skills else ' · 暂未填写技能'}
+        {major} · {city}{skill_text}
     </p>
-</div>
-""", unsafe_allow_html=True)
+</div>""", unsafe_allow_html=True)
 
 if not recs:
     st.warning(f"😅 抱歉，在 {city} 暂未找到与 {major} 匹配度较高的岗位数据")
