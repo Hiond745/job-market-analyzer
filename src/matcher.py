@@ -39,11 +39,13 @@ def get_city_jobs(df: pd.DataFrame, city: str) -> pd.DataFrame:
 
     Args:
         df: 完整岗位 DataFrame
-        city: 城市名称
+        city: 城市名称，传入「全国」返回全部数据
 
     Returns:
         筛选后的 DataFrame
     """
+    if city == "全国":
+        return df.copy()
     return df[df["city"] == city].copy()
 
 

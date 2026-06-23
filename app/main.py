@@ -5,7 +5,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
-from src.config import DEFAULT_MAJOR, DEFAULT_CITY
+from src.config import DEFAULT_MAJOR, DEFAULT_CITY, MAJORS, CITIES
 from src.matcher import recommend_positions
 
 st.set_page_config(
@@ -14,6 +14,17 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+
+# 侧边栏导航
+with st.sidebar:
+    st.markdown("### 🎯 导航")
+    if st.button("🏠 首页", use_container_width=True):
+        st.switch_page("main.py")
+    if st.button("🗄️ 数据管理", use_container_width=True):
+        st.switch_page("pages/03_data_manage.py")
+    st.markdown("---")
+    st.markdown("**当前版本:** v0.1.0")
+    st.markdown("**数据量:** 预置5000条模拟数据")
 
 # 初始化 Session State
 if "major" not in st.session_state:
@@ -44,10 +55,16 @@ with st.container():
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         with st.form("input_form"):
-            major = st.text_input("📚 你的专业", value=DEFAULT_MAJOR,
-                                  help="输入你的专业全称，如：数据科学与大数据技术")
-            city = st.text_input("📍 目标地区", value=DEFAULT_CITY,
-                                 help="输入你想找工作的城市，如：天津、北京")
+            major = st.selectbox("📚 你的专业", options=["其他"] + MAJORS,
+                                 index=MAJORS.index(DEFAULT_MAJOR) + 1 if DEFAULT_MAJOR in MAJORS else 0,
+                                 help="选择你的专业，未列出可选「其他」手动输入")
+            if major == "其他":
+                major = st.text_input("请手动输入专业名称", value="",
+                                      placeholder="如：统计学、信息管理与信息系统")
+
+            city = st.selectbox("📍 目标地区", options=["全国"] + CITIES,
+                                index=CITIES.index(DEFAULT_CITY) + 1,
+                                help="选择你想找工作的城市，选「全国」查看所有地区")
             skills = st.text_input("🛠️ 你的技能（可选）", placeholder="Python, SQL, Spark, ...",
                                    help="用逗号分隔你掌握的技能，用于简历匹配分析")
 

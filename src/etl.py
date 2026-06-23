@@ -729,3 +729,56 @@ def run_etl(
 
 if __name__ == "__main__":
     run_etl()
+
+
+def import_csv_to_db(csv_path: str | Path, db_path: Optional[Path] = None) -> dict:
+    """从 CSV 文件导入真实招聘数据到数据库。
+
+    Args:
+        csv_path: CSV 文件路径
+        db_path: 目标数据库路径，默认使用 config.DB_PATH
+
+    Returns:
+        导入结果统计: {"status": "ok"/"error", "records": n, "message": "..."}
+    """
+    try:
+        print(f"加载 CSV: {csv_path}")
+        df = pd.read_csv(csv_path)
+
+        # 统一列名
+        df = df.rename(columns={k: v for k, v in COLUMN_ALIASES.items() if k in df.columns})
+
+        # 检查必需列
+        required_cols = ["title", "location"]
+        missing = [c for c in required_cols if c not in df.columns]
+        if missing:
+            # 尝试从已有列名猜测
+            available = list(df.columns)
+            return {
+                "status": "error",
+                "records": 0,
+                "message": f"缺少必需列: {', '.join(missing)}\nCSV 中的列: {', '.join(available)}",
+            }
+
+        # 清洗
+        df = clean_data(df)
+
+        # 过滤无城市数据
+        before = len(df)
+        df = df[df["city"] != "未知"]
+        after = len(df)
+        if after == 0:
+            return {"status": "error", "records": 0,
+                    "message": "所有数据都无法识别城市，请检查 location 列是否包含城市名"}
+
+        # 构建数据库（追加模式）
+        build_database(df, db_path=db_path)
+
+        return {
+            "status": "ok",
+            "records": after,
+            "filtered": before - after,
+            "message": f"成功导入 {after} 条记录（{before - after} 条因城市无法识别被过滤）",
+        }
+    except Exception as e:
+        return {"status": "error", "records": 0, "message": f"导入失败: {str(e)}"}
