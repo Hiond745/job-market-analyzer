@@ -6,22 +6,10 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from src.config import DB_PATH, EDUCATION_ORDER, EXPERIENCE_ORDER
+from src.config import DB_PATH, EDUCATION_ORDER, EXPERIENCE_ORDER, SKILL_OPTIONS
 
-# 常见技能关键词列表（用于技能提取）
-COMMON_SKILLS = [
-    "Python", "SQL", "Java", "Spark", "Hadoop", "Flink", "Kafka", "Hive",
-    "Tableau", "PowerBI", "Excel",
-    "机器学习", "深度学习", "NLP", "CV",
-    "TensorFlow", "PyTorch", "Scikit-learn", "Pandas", "NumPy",
-    "统计学", "AB测试",
-    "数据结构", "算法",
-    "Linux", "Docker", "Kubernetes",
-    "MongoDB", "Redis", "MySQL", "PostgreSQL",
-    "Airflow", "ETL", "Git",
-    "Go", "C++",
-    "数据可视化", "特征工程", "模型部署", "微服务",
-]
+# 常见技能关键词列表（使用 config.py 中的统一技能列表）
+COMMON_SKILLS = SKILL_OPTIONS
 
 
 def get_jobs_by_title(title: str, city: str) -> pd.DataFrame:
